@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sport dans le mois</title>
+  <style>
+    :root {
+      /* Mode Clair (Apple Style) */
+      --bg-color: #f2f2f7;
+      --card-bg: #ffffff;
+      --text-color: #000000;
+      --subtext-color: #8e8e93;
+      --border-color: #e5e5ea;
+      --day-hover: #e5e5ea;
+      --accent-system: #000000;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* Mode Sombre (Apple Style) */
+        --bg-color: #000000;
+        --card-bg: #1c1c1e;
+        --text-color: #ffffff;
+        --subtext-color: #8e8e93;
+        --border-color: #38383a;
+        --day-hover: #2c2c2e;
+        --accent-system: #ffffff;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--card-bg);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--accent-system);
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .nav-btn:hover {
+      background-color: var(--day-hover);
+    }
+
+    /* Commutateur Fait / Planifier avec animation fluide */
+    .mode-switch {
+      display: flex;
+      background-color: var(--day-hover);
+      padding: 3px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--subtext-color);
+      border-radius: 9px;
+      cursor: pointer;
+      z-index: 1;
+      transition: color 0.25s ease, transform 0.2s ease;
+    }
+
+    .mode-btn:active {
+      transform: scale(0.97);
+    }
+
+    .mode-btn.active {
+      color: var(--text-color);
+    }
+
+    /* Indicateur animé en arrière-plan des onglets */
+    .mode-indicator {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background-color: var(--card-bg);
+      border-radius: 9px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .mode-switch.plan-active .mode-indicator {
+      transform: translateX(100%);
+    }
+
+    /* Section Accordéon Sports */
+    .sports-section {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sports-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      gap: 12px;
+      min-height: 28px;
+    }
+
+    .sports-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--subtext-color);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* Conteneur d'aperçu des 5 premiers sports quand réduit */
+    .collapsed-sports-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+      justify-content: center;
+      padding: 4px 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .collapsed-sports-preview.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+    }
+
+    .preview-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease, outline 0.15s ease;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .preview-dot:hover {
+      transform: scale(1.15);
+    }
+
+    /* Contour reprenant exactement la couleur de la police "MES SPORTS" */
+    .preview-dot.active {
+      outline: 2px solid var(--subtext-color);
+      outline-offset: 2px;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: var(--subtext-color);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .sports-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      max-height: 500px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      opacity: 1;
+    }
+
+    .sports-list.collapsed {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+      pointer-events: none;
+    }
+
+    .sport-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 12px;
+      transition: background-color 0.2s ease;
+      position: relative;
+    }
+
+    .sport-item:hover {
+      background-color: var(--day-hover);
+    }
+
+    .sport-item.active {
+      background-color: var(--day-hover);
+      font-weight: 600;
+    }
+
+    .color-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .sport-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color);
+      width: 100%;
+      user-select: none;
+    }
+
+    .sport-input {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 2px 6px;
+      width: 100%;
+      outline: none;
+    }
+
+    .color-picker-hidden {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .edit-btn {
+      background: none;
+      border: none;
+      color: #ff9f0a;
+      cursor: pointer;
+      padding: 0 4px;
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease;
+    }
+
+    .edit-btn:hover {
+      opacity: 1;
+    }
+
+    .edit-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #ff3b30;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0 4px;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-btn:hover {
+      opacity: 1;
+    }
+
+    .add-sport-btn {
+      background: none;
+      border: 1px dashed var(--border-color);
+      color: var(--accent-system);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .add-sport-btn:hover {
+      background-color: var(--day-hover);
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .weekday {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--subtext-color);
+      text-transform: uppercase;
+    }
+
+    /* Animation fluide sur le conteneur de jours */
+    .days-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .days.fade-next-out {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .days.fade-next-in {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    .days.fade-prev-out {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    .days.fade-prev-in {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .day {
+      aspect-ratio: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 50%;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      box-sizing: border-box;
+    }
+
+    .day:not(.empty):hover {
+      background-color: var(--day-hover);
+    }
+
+    .day:not(.empty):active {
+      transform: scale(0.92);
+    }
+
+    .day.empty {
+      cursor: default;
+    }
+
+    .day.today:not([data-active]):not([data-planned]) {
+      border: 2px solid var(--accent-system);
+      color: var(--accent-system);
+      font-weight: 700;
+    }
+
+    .day[data-planned="true"] {
+      border: 2px dashed var(--plan-color);
+      color: var(--text-color);
+      font-weight: 700;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      color: var(--subtext-color);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .stats-count {
+      color: var(--text-color);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1 id="month-year"></h1>
+      <div>
+        <button class="nav-btn" id="prev-btn">&#10094;</button>
+        <button class="nav-btn" id="next-btn">&#10095;</button>
+      </div>
+    </div>
+
+    <!-- Commutateur Fait / Planifier avec indicateur animé -->
+    <div class="mode-switch" id="mode-switch">
+      <div class="mode-indicator"></div>
+      <button class="mode-btn active" id="mode-done-btn">✓ Fait</button>
+      <button class="mode-btn" id="mode-plan-btn">Planifier</button>
+    </div>
+
+    <!-- Section Menu des Sports -->
+    <div class="sports-section">
+      <div class="sports-header" id="toggle-sports">
+        <span class="sports-title">Mes Sports</span>
+        <div class="collapsed-sports-preview" id="sports-preview"></div>
+        <button class="toggle-btn" id="toggle-btn-text">Réduire</button>
+      </div>
+
+      <div class="sports-list" id="sports-list"></div>
+      <button class="add-sport-btn" id="add-sport-btn">+ Ajouter un sport</button>
+    </div>
+
+    <div class="weekdays">
+      <div class="weekday">Lun</div>
+      <div class="weekday">Mar</div>
+      <div class="weekday">Mer</div>
+      <div class="weekday">Jeu</div>
+      <div class="weekday">Ven</div>
+      <div class="weekday">Sam</div>
+      <div class="weekday">Dim</div>
+    </div>
+
+    <div class="days-wrapper">
+      <div class="days" id="days-container"></div>
+    </div>
+
+    <div class="stats">
+      <span>Fait / Planifié</span>
+      <span class="stats-count" id="workout-count">0 / 0</span>
+    </div>
+  </div>
+
+  <script>
+    let currentDate = new Date();
+    let selectedSportId = null;
+    let editingSportId = null;
+    let currentMode = 'done';
+    let isNavigating = false;
+
+    const defaultColors = ['#30d158', '#0a84ff', '#ff9f0a', '#bf5af2', '#ff3b30', '#ffd60a', '#64d2ff', '#ff2d55'];
+
+    const defaultSports = [
+      { id: '1', name: "Musculation", color: '#30d158' },
+      { id: '2', name: "Course à pied", color: '#0a84ff' },
+      { id: '3', name: "Cyclisme", color: '#ff9f0a' },
+      { id: '4', name: "Natation", color: '#bf5af2' },
+      { id: '5', name: "Autre sport", color: '#ff3b30' }
+    ];
+
+    let sports = JSON.parse(localStorage.getItem('sports_config')) || defaultSports;
+    if (sports.length > 0) selectedSportId = sports[0].id;
+
+    const monthYearElement = document.getElementById('month-year');
+    const daysContainer = document.getElementById('days-container');
+    const sportsList = document.getElementById('sports-list');
+    const sportsPreview = document.getElementById('sports-preview');
+    const toggleSportsHeader = document.getElementById('toggle-sports');
+    const toggleBtnText = document.getElementById('toggle-btn-text');
+    const addSportBtn = document.getElementById('add-sport-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const workoutCountElement = document.getElementById('workout-count');
+    const modeSwitch = document.getElementById('mode-switch');
+    const modeDoneBtn = document.getElementById('mode-done-btn');
+    const modePlanBtn = document.getElementById('mode-plan-btn');
+
+    // Gestion des modes avec animation
+    modeDoneBtn.addEventListener('click', () => {
+      currentMode = 'done';
+      modeDoneBtn.classList.add('active');
+      modePlanBtn.classList.remove('active');
+      modeSwitch.classList.remove('plan-active');
+    });
+
+    modePlanBtn.addEventListener('click', () => {
+      currentMode = 'plan';
+      modePlanBtn.classList.add('active');
+      modeDoneBtn.classList.remove('active');
+      modeSwitch.classList.add('plan-active');
+    });
+
+    // Accordéon & Aperçu des sports réduits
+    let isCollapsed = localStorage.getItem('sports_collapsed') === 'true';
+    
+    function updateAccordion() {
+      sportsList.classList.toggle('collapsed', isCollapsed);
+      addSportBtn.style.display = isCollapsed ? 'none' : 'block';
+      toggleBtnText.textContent = isCollapsed ? 'Afficher' : 'Réduire';
+      
+      if (isCollapsed) {
+        sportsPreview.classList.remove('hidden');
+      } else {
+        sportsPreview.classList.add('hidden');
+      }
+    }
+
+    toggleSportsHeader.addEventListener('click', (e) => {
+      if (e.target.classList.contains('preview-dot')) return;
+      isCollapsed = !isCollapsed;
+      localStorage.setItem('sports_collapsed', isCollapsed);
+      updateAccordion();
+    });
+
+    // Rendus des aperçus rapides des 5 premiers sports
+    function renderSportsPreview() {
+      sportsPreview.innerHTML = '';
+      const topSports = sports.slice(0, 5);
+      
+      topSports.forEach(sport => {
+        const dot = document.createElement('div');
+        dot.className = `preview-dot ${sport.id === selectedSportId ? 'active' : ''}`;
+        dot.style.backgroundColor = sport.color;
+        dot.title = sport.name;
+
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectedSportId = sport.id;
+          renderSportsList();
+          renderSportsPreview();
+        });
+
+        sportsPreview.appendChild(dot);
+      });
+    }
+
+    // Affichage des choix de sports
+    function renderSportsList() {
+      sportsList.innerHTML = '';
+      sports.forEach(sport => {
+        const item = document.createElement('div');
+        item.className = `sport-item ${sport.id === selectedSportId ? 'active' : ''}`;
+
+        const dot = document.createElement('div');
+        dot.className = 'color-dot';
+        dot.style.backgroundColor = sport.color;
+
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = sport.color;
+        colorInput.className = 'color-picker-hidden';
+
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          colorInput.click();
+        });
+
+        colorInput.addEventListener('input', (e) => {
+          sport.color = e.target.value;
+          dot.style.backgroundColor = sport.color;
+          saveSports();
+          renderSportsPreview();
+          renderCalendar();
+        });
+
+        item.appendChild(dot);
+        item.appendChild(colorInput);
+
+        if (editingSportId === sport.id) {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'sport-input';
+          input.value = sport.name;
+
+          const finishEditing = () => {
+            sport.name = input.value.trim() || "Sport";
+            editingSportId = null;
+            saveSports();
+            renderSportsList();
+            renderSportsPreview();
+          };
+
+          input.addEventListener('change', finishEditing);
+          input.addEventListener('blur', finishEditing);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') finishEditing();
+          });
+
+          item.appendChild(input);
+          setTimeout(() => input.focus(), 50);
+        } else {
+          const label = document.createElement('span');
+          label.className = 'sport-label';
+          label.textContent = sport.name;
+          item.appendChild(label);
+        }
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+        editBtn.title = "Modifier le nom";
+
+        editBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          editingSportId = (editingSportId === sport.id) ? null : sport.id;
+          renderSportsList();
+        });
+
+        item.appendChild(editBtn);
+
+        if (sports.length > 1) {
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-btn';
+          deleteBtn.innerHTML = '&times;';
+          deleteBtn.title = "Supprimer";
+
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sports = sports.filter(s => s.id !== sport.id);
+            if (selectedSportId === sport.id) {
+              selectedSportId = sports.length > 0 ? sports[0].id : null;
+            }
+            if (editingSportId === sport.id) {
+              editingSportId = null;
+            }
+            saveSports();
+            renderSportsList();
+            renderSportsPreview();
+            renderCalendar();
+          });
+
+          item.appendChild(deleteBtn);
+        }
+
+        item.addEventListener('click', () => {
+          if (editingSportId !== sport.id) {
+            selectedSportId = sport.id;
+            renderSportsList();
+            renderSportsPreview();
+          }
+        });
+
+        sportsList.appendChild(item);
+      });
+    }
+
+    addSportBtn.addEventListener('click', () => {
+      const newId = Date.now().toString();
+      const randomColor = defaultColors[sports.length % defaultColors.length];
+      sports.push({ id: newId, name: `Sport ${sports.length + 1}`, color: randomColor });
+      selectedSportId = newId;
+      saveSports();
+      renderSportsList();
+      renderSportsPreview();
+    });
+
+    function saveSports() {
+      localStorage.setItem('sports_config', JSON.stringify(sports));
+    }
+
+    function getContrastTextColor(hexColor) {
+      if (!hexColor || hexColor[0] !== '#') return '#000000';
+      let hex = hexColor.substring(1);
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const r = parseInt(hex.substring(0, 2), 16) || 0;
+      const g = parseInt(hex.substring(2, 4), 16) || 0;
+      const b = parseInt(hex.substring(4, 6), 16) || 0;
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#000000' : '#ffffff';
+    }
+
+    // Affichage du calendrier
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+      monthYearElement.textContent = `${monthNames[month]} ${year}`;
+
+      daysContainer.innerHTML = '';
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let paddingDays = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+      for (let i = 0; i < paddingDays; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.classList.add('day', 'empty');
+        daysContainer.appendChild(emptyDiv);
+      }
+
+      let doneCount = 0;
+      let planCount = 0;
+      const today = new Date();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.classList.add('day');
+        dayDiv.textContent = day;
+
+        const dateDoneKey = `workout_${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const datePlanKey = `plan_${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          dayDiv.classList.add('today');
+        }
+
+        const savedDoneSportId = localStorage.getItem(dateDoneKey);
+        const savedPlanSportId = localStorage.getItem(datePlanKey);
+
+        const doneSport = sports.find(s => s.id === savedDoneSportId);
+        const planSport = sports.find(s => s.id === savedPlanSportId);
+
+        if (doneSport) {
+          dayDiv.style.backgroundColor = doneSport.color;
+          dayDiv.style.color = getContrastTextColor(doneSport.color);
+          dayDiv.style.fontWeight = '700';
+          dayDiv.dataset.active = 'true';
+          doneCount++;
+        } else if (planSport) {
+          dayDiv.dataset.planned = 'true';
+          dayDiv.style.setProperty('--plan-color', planSport.color);
+          planCount++;
+        }
+
+        dayDiv.addEventListener('click', () => {
+          if (!selectedSportId) return;
+
+          if (currentMode === 'done') {
+            const currentDoneId = localStorage.getItem(dateDoneKey);
+            if (currentDoneId === selectedSportId) {
+              localStorage.removeItem(dateDoneKey);
+            } else {
+              localStorage.setItem(dateDoneKey, selectedSportId);
+            }
+          } else {
+            const currentPlanId = localStorage.getItem(datePlanKey);
+            if (currentPlanId === selectedSportId) {
+              localStorage.removeItem(datePlanKey);
+            } else {
+              localStorage.setItem(datePlanKey, selectedSportId);
+            }
+          }
+          renderCalendar();
+        });
+
+        daysContainer.appendChild(dayDiv);
+      }
+
+      updateStats(doneCount, planCount);
+    }
+
+    // Changement de mois avec transition fluide
+    function navigateMonth(direction) {
+      if (isNavigating) return;
+      isNavigating = true;
+
+      const outClass = direction === 'next' ? 'fade-next-out' : 'fade-prev-out';
+      const inClass = direction === 'next' ? 'fade-next-in' : 'fade-prev-in';
+
+      daysContainer.classList.add(outClass);
+
+      setTimeout(() => {
+        currentDate.setMonth(currentDate.getMonth() + (direction === 'next' ? 1 : -1));
+        renderCalendar();
+        
+        daysContainer.classList.remove(outClass);
+        daysContainer.classList.add(inClass);
+
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            daysContainer.classList.remove(inClass);
+            isNavigating = false;
+          }, 50);
+        });
+      }, 200);
+    }
+
+    function updateStats(done, plan) {
+      workoutCountElement.textContent = `${done} fait${done > 1 ? 's' : ''} / ${plan} prévu${plan > 1 ? 's' : ''}`;
+    }
+
+    prevBtn.addEventListener('click', () => navigateMonth('prev'));
+    nextBtn.addEventListener('click', () => navigateMonth('next'));
+
+    renderSportsList();
+    renderSportsPreview();
+    updateAccordion();
+    renderCalendar();
+  </script>
+</body>
+</html>
