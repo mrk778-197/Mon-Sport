@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <!-- Icône unique (Mode Sombre) pour l'écran d'accueil iOS -->
-<link rel="apple-touch-icon" href="favicon-dark.jpeg">
-
-<!-- Icône unique (Mode Sombre) pour les onglets du navigateur -->
-<link rel="icon" type="image/jpeg" href="favicon-dark.jpeg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sport dans le mois</title>
+  <title>Sport</title>
+
+  <!-- Icône unique (Mode Sombre) pour l'écran d'accueil iOS et navigateurs -->
+  <link rel="apple-touch-icon" href="favicon-dark.jpeg">
+  <link rel="icon" type="image/jpeg" href="favicon-dark.jpeg">
+
   <style>
     :root {
       /* Mode Clair (Apple Style) */
@@ -63,6 +63,49 @@
       overflow: hidden;
     }
 
+    /* Top Bar : "Mes séances" + Settings */
+    .app-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .app-topbar h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .btn-settings {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      opacity: 0.85;
+      transition: opacity 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-settings:hover {
+      opacity: 1;
+      background-color: var(--day-hover);
+    }
+
+    .btn-settings svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -71,7 +114,7 @@
     }
 
     .header h1 {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       text-transform: capitalize;
     }
@@ -197,7 +240,6 @@
       transform: scale(1.15);
     }
 
-    /* Contour reprenant exactement la couleur de la police "MES SPORTS" */
     .preview-dot.active {
       outline: 2px solid var(--subtext-color);
       outline-offset: 2px;
@@ -450,11 +492,80 @@
       color: var(--text-color);
       font-weight: 700;
     }
+
+    /* Popup Modal Paramètres */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      color: var(--text-color);
+      padding: 20px;
+      border-radius: 18px;
+      width: 85%;
+      max-width: 320px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .modal-content p {
+      font-size: 13px;
+      color: var(--subtext-color);
+      margin-bottom: 16px;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .btn-danger {
+      background-color: #ff3b30;
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background-color: var(--day-hover);
+      color: var(--text-color);
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- En-tête "Mes séances" + Bouton Réglages -->
+    <div class="app-topbar">
+      <h2>Mes séances</h2>
+      <button class="btn-settings" id="btn-open-settings" aria-label="Paramètres">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+
     <div class="header">
       <h1 id="month-year"></h1>
       <div>
@@ -463,7 +574,7 @@
       </div>
     </div>
 
-    <!-- Commutateur Fait / Planifier avec indicateur animé -->
+    <!-- Commutateur Fait / Planifier -->
     <div class="mode-switch" id="mode-switch">
       <div class="mode-indicator"></div>
       <button class="mode-btn active" id="mode-done-btn">✓ Fait</button>
@@ -502,6 +613,16 @@
     </div>
   </div>
 
+  <!-- Pop-up Modal des Paramètres -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal-content">
+      <h3>Paramètres</h3>
+      <p id="settings-stats-text">Nombre de séances enregistrées : 0</p>
+      <button class="modal-btn btn-danger" id="btn-reset-data">Réinitialiser les données</button>
+      <button class="modal-btn btn-secondary" id="btn-close-settings">Fermer</button>
+    </div>
+  </div>
+
   <script>
     let currentDate = new Date();
     let selectedSportId = null;
@@ -536,7 +657,62 @@
     const modeDoneBtn = document.getElementById('mode-done-btn');
     const modePlanBtn = document.getElementById('mode-plan-btn');
 
-    // Gestion des modes avec animation
+    // Modale Settings
+    const modalSettings = document.getElementById('modal-settings');
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const btnResetData = document.getElementById('btn-reset-data');
+    const settingsStatsText = document.getElementById('settings-stats-text');
+
+    btnOpenSettings.addEventListener('click', () => {
+      let totalWorkouts = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('workout_')) totalWorkouts++;
+      }
+      settingsStatsText.textContent = `Séances enregistrées : ${totalWorkouts}`;
+      modalSettings.classList.add('active');
+    });
+
+    btnCloseSettings.addEventListener('click', () => {
+      modalSettings.classList.remove('active');
+    });
+
+    btnResetData.addEventListener('click', () => {
+      if (confirm("Es-tu sûr de vouloir effacer toutes tes séances et réinitialiser l'application ?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    });
+
+    // Détection OS pour l'export Calendrier
+    function estiOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function exporterEvenementCalendrier(titreSport, dateStr) {
+      const reponse = confirm("Voulez vous ajouter cet évent à votre calendrier ?");
+      if (reponse) {
+        if (estiOS()) {
+          // Apple Calendar (.ics)
+          const cleanDate = dateStr.replace(/-/g, '');
+          const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Séance ${titreSport}\nDTSTART:${cleanDate}T090000Z\nDTEND:${cleanDate}T100000Z\nEND:VEVENT\nEND:VCALENDAR`;
+          const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = 'seance.ics';
+          link.click();
+        } else {
+          // Google Agenda
+          const cleanDate = dateStr.replace(/-/g, '');
+          const urlGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Séance ' + titreSport)}&dates=${cleanDate}T090000Z/${cleanDate}T100000Z`;
+          window.open(urlGoogle, '_blank');
+        }
+      }
+    }
+
+    // Gestion des modes
     modeDoneBtn.addEventListener('click', () => {
       currentMode = 'done';
       modeDoneBtn.classList.add('active');
@@ -551,7 +727,7 @@
       modeSwitch.classList.add('plan-active');
     });
 
-    // Accordéon & Aperçu des sports réduits
+    // Accordéon Sports
     let isCollapsed = localStorage.getItem('sports_collapsed') === 'true';
     
     function updateAccordion() {
@@ -573,7 +749,6 @@
       updateAccordion();
     });
 
-    // Rendus des aperçus rapides des 5 premiers sports
     function renderSportsPreview() {
       sportsPreview.innerHTML = '';
       const topSports = sports.slice(0, 5);
@@ -595,7 +770,6 @@
       });
     }
 
-    // Affichage des choix de sports
     function renderSportsList() {
       sportsList.innerHTML = '';
       sports.forEach(sport => {
@@ -730,7 +904,7 @@
       return (yiq >= 128) ? '#000000' : '#ffffff';
     }
 
-    // Affichage du calendrier
+    // Calendrier avec appui long pour l'export calendrier
     function renderCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -759,8 +933,9 @@
         dayDiv.classList.add('day');
         dayDiv.textContent = day;
 
-        const dateDoneKey = `workout_${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const datePlanKey = `plan_${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateDoneKey = `workout_${formattedDate}`;
+        const datePlanKey = `plan_${formattedDate}`;
 
         if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
           dayDiv.classList.add('today');
@@ -784,7 +959,26 @@
           planCount++;
         }
 
+        // --- Appui long pour exporter au calendrier ---
+        let touchTimer = null;
+        let isLongPress = false;
+
+        dayDiv.addEventListener('touchstart', () => {
+          isLongPress = false;
+          touchTimer = setTimeout(() => {
+            isLongPress = true;
+            const currentSportObj = sports.find(s => s.id === selectedSportId);
+            const sportName = currentSportObj ? currentSportObj.name : "Sport";
+            exporterEvenementCalendrier(sportName, formattedDate);
+          }, 500); // 0.5s d'appui long
+        });
+
+        dayDiv.addEventListener('touchend', () => clearTimeout(touchTimer));
+        dayDiv.addEventListener('touchmove', () => clearTimeout(touchTimer));
+
+        // Clik classique (sauf si appui long détecté)
         dayDiv.addEventListener('click', () => {
+          if (isLongPress) return;
           if (!selectedSportId) return;
 
           if (currentMode === 'done') {
@@ -811,7 +1005,6 @@
       updateStats(doneCount, planCount);
     }
 
-    // Changement de mois avec transition fluide
     function navigateMonth(direction) {
       if (isNavigating) return;
       isNavigating = true;
