@@ -1291,31 +1291,23 @@
           planCount++;
         }
 
-        // Appui Long Export Calendrier
-        let touchTimer = null;
-        let isLongPress = false;
+                // Double Appui Export Calendrier (< 500ms)
+        let lastTapTime = 0;
 
-        const startPress = () => {
-          isLongPress = false;
-          touchTimer = setTimeout(() => {
-            isLongPress = true;
+        dayDiv.addEventListener('click', (e) => {
+          const currentTime = new Date().getTime();
+          const tapLength = currentTime - lastTapTime;
+
+          if (tapLength < 500 && tapLength > 0) {
+            e.preventDefault();
             const currentSportObj = sports.find(s => s.id === selectedSportId);
             triggerCalendarModal(currentSportObj ? currentSportObj.name : "Sport", formattedDate);
-          }, 500);
-        };
+            lastTapTime = 0;
+            return;
+          }
 
-        const cancelPress = () => clearTimeout(touchTimer);
+          lastTapTime = currentTime;
 
-        dayDiv.addEventListener('touchstart', startPress);
-        dayDiv.addEventListener('touchend', cancelPress);
-        dayDiv.addEventListener('touchmove', cancelPress);
-
-        dayDiv.addEventListener('mousedown', startPress);
-        dayDiv.addEventListener('mouseup', cancelPress);
-        dayDiv.addEventListener('mouseleave', cancelPress);
-
-        dayDiv.addEventListener('click', () => {
-          if (isLongPress) return;
           if (!selectedSportId) return;
 
           if (currentMode === 'done') {
