@@ -2,16 +2,16 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sport</title>
 
-  <!-- Icône unique (Mode Sombre) pour l'écran d'accueil iOS et navigateurs -->
+  <!-- Icônes App iOS / Web -->
   <link rel="apple-touch-icon" href="favicon-dark.jpeg">
   <link rel="icon" type="image/jpeg" href="favicon-dark.jpeg">
 
   <style>
     :root {
-      /* Mode Clair (Apple Style) */
+      /* Mode Clair */
       --bg-color: #f2f2f7;
       --card-bg: #ffffff;
       --text-color: #000000;
@@ -19,11 +19,22 @@
       --border-color: #e5e5ea;
       --day-hover: #e5e5ea;
       --accent-system: #000000;
+      --modal-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #000000;
+      --card-bg: #1c1c1e;
+      --text-color: #ffffff;
+      --subtext-color: #8e8e93;
+      --border-color: #38383a;
+      --day-hover: #2c2c2e;
+      --accent-system: #ffffff;
+      --modal-bg: rgba(28, 28, 30, 0.95);
     }
 
     @media (prefers-color-scheme: dark) {
-      :root {
-        /* Mode Sombre (Apple Style) */
+      :root:not([data-theme="light"]) {
         --bg-color: #000000;
         --card-bg: #1c1c1e;
         --text-color: #ffffff;
@@ -31,6 +42,7 @@
         --border-color: #38383a;
         --day-hover: #2c2c2e;
         --accent-system: #ffffff;
+        --modal-bg: rgba(28, 28, 30, 0.95);
       }
     }
 
@@ -47,32 +59,30 @@
       color: var(--text-color);
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
-      padding: 20px;
+      padding: 20px 16px;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    .container {
+    .app-wrapper {
       width: 100%;
       max-width: 420px;
-      background-color: var(--card-bg);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    /* Top Bar : "Mes séances" + Settings */
-    .app-topbar {
+    /* En-tête Hors-Bloc (Mes séances + Roue crantée) */
+    .app-topbar-outside {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      padding: 4px 8px;
     }
 
-    .app-topbar h2 {
-      font-size: 24px;
+    .app-topbar-outside h2 {
+      font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
@@ -82,7 +92,7 @@
       border: none;
       color: var(--text-color);
       cursor: pointer;
-      padding: 4px;
+      padding: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -97,13 +107,23 @@
     }
 
     .btn-settings svg {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
+    }
+
+    /* Carte principale */
+    .container {
+      width: 100%;
+      background-color: var(--card-bg);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
     }
 
     .header {
@@ -134,7 +154,7 @@
       background-color: var(--day-hover);
     }
 
-    /* Commutateur Fait / Planifier avec animation fluide */
+    /* Switch Fait / Planifier */
     .mode-switch {
       display: flex;
       background-color: var(--day-hover);
@@ -166,7 +186,6 @@
       color: var(--text-color);
     }
 
-    /* Indicateur animé en arrière-plan des onglets */
     .mode-indicator {
       position: absolute;
       top: 3px;
@@ -183,7 +202,7 @@
       transform: translateX(100%);
     }
 
-    /* Section Accordéon Sports */
+    /* Accordéon Sports */
     .sports-section {
       margin-bottom: 20px;
       padding-bottom: 16px;
@@ -208,7 +227,6 @@
       white-space: nowrap;
     }
 
-    /* Conteneur d'aperçu des 5 premiers sports quand réduit */
     .collapsed-sports-preview {
       display: flex;
       align-items: center;
@@ -233,7 +251,6 @@
       cursor: pointer;
       transition: transform 0.2s ease, outline 0.15s ease;
       flex-shrink: 0;
-      box-sizing: border-box;
     }
 
     .preview-dot:hover {
@@ -330,47 +347,22 @@
       pointer-events: none;
     }
 
-    .edit-btn {
+    .edit-btn, .delete-btn {
       background: none;
       border: none;
-      color: #ff9f0a;
       cursor: pointer;
       padding: 0 4px;
-      opacity: 0.85;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.2s ease;
-    }
-
-    .edit-btn:hover {
-      opacity: 1;
-    }
-
-    .edit-btn svg {
-      width: 15px;
-      height: 15px;
-      fill: currentColor;
-    }
-
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #ff3b30;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 0 4px;
-      opacity: 0.6;
-      transition: opacity 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .delete-btn:hover {
-      opacity: 1;
-    }
+    .edit-btn { color: #ff9f0a; opacity: 0.85; }
+    .edit-btn:hover { opacity: 1; }
+    .edit-btn svg { width: 15px; height: 15px; fill: currentColor; }
+
+    .delete-btn { color: #ff3b30; font-size: 18px; opacity: 0.6; }
+    .delete-btn:hover { opacity: 1; }
 
     .add-sport-btn {
       background: none;
@@ -404,7 +396,6 @@
       text-transform: uppercase;
     }
 
-    /* Animation fluide sur le conteneur de jours */
     .days-wrapper {
       position: relative;
       overflow: hidden;
@@ -415,28 +406,6 @@
       grid-template-columns: repeat(7, 1fr);
       gap: 8px;
       transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .days.fade-next-out {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-
-    .days.fade-next-in {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-
-    .days.fade-prev-out {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-
-    .days.fade-prev-in {
-      opacity: 0;
-      transform: translateX(-20px);
     }
 
     .day {
@@ -449,21 +418,12 @@
       border-radius: 50%;
       cursor: pointer;
       user-select: none;
-      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-      box-sizing: border-box;
+      transition: background-color 0.2s ease, transform 0.15s ease;
     }
 
-    .day:not(.empty):hover {
-      background-color: var(--day-hover);
-    }
-
-    .day:not(.empty):active {
-      transform: scale(0.92);
-    }
-
-    .day.empty {
-      cursor: default;
-    }
+    .day:not(.empty):hover { background-color: var(--day-hover); }
+    .day:not(.empty):active { transform: scale(0.92); }
+    .day.empty { cursor: default; }
 
     .day.today:not([data-active]):not([data-planned]) {
       border: 2px solid var(--accent-system);
@@ -482,10 +442,16 @@
       padding-top: 16px;
       border-top: 1px solid var(--border-color);
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 8px;
       color: var(--subtext-color);
       font-size: 14px;
       font-weight: 500;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
     }
 
     .stats-count {
@@ -493,70 +459,179 @@
       font-weight: 700;
     }
 
-    /* Popup Modal Paramètres */
-    .modal-overlay {
-      display: none;
+    /* Barre de progression Objectif */
+    .goal-progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: var(--day-hover);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .goal-progress-fill {
+      height: 100%;
+      background-color: #30d158;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* --- POPUP / BOTTOM SHEET (Apple Style) --- */
+    .sheet-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      justify-content: center;
-      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .sheet-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 500px;
+      margin: 0 auto;
+      background: var(--modal-bg);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 16px 20px 32px 20px;
       z-index: 1000;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+      max-height: 85vh;
+      overflow-y: auto;
     }
 
-    .modal-overlay.active {
+    .sheet-overlay.active .bottom-sheet {
+      transform: translateY(0);
+    }
+
+    .sheet-handle {
+      width: 36px;
+      height: 5px;
+      background-color: var(--subtext-color);
+      opacity: 0.4;
+      border-radius: 3px;
+      margin: 0 auto 16px auto;
+    }
+
+    .sheet-header {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
 
-    .modal-content {
-      background: var(--card-bg);
-      color: var(--text-color);
-      padding: 20px;
-      border-radius: 18px;
-      width: 85%;
-      max-width: 320px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    .sheet-header h3 {
+      font-size: 20px;
+      font-weight: 700;
     }
 
-    .modal-content h3 {
-      font-size: 18px;
-      margin-bottom: 6px;
-    }
-
-    .modal-content p {
-      font-size: 13px;
-      color: var(--subtext-color);
-      margin-bottom: 16px;
-    }
-
-    .modal-btn {
-      width: 100%;
-      padding: 11px;
+    .btn-close-sheet {
+      background: var(--day-hover);
       border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 14px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      color: var(--subtext-color);
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .setting-group {
+      margin-bottom: 20px;
+    }
+
+    .setting-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--subtext-color);
+      text-transform: uppercase;
       margin-bottom: 8px;
+      letter-spacing: 0.5px;
     }
 
-    .btn-danger {
-      background-color: #ff3b30;
-      color: #ffffff;
+    .setting-item {
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
     }
 
-    .btn-secondary {
-      background-color: var(--day-hover);
+    .setting-item select, .setting-item input[type="number"] {
+      background: var(--day-hover);
+      border: none;
       color: var(--text-color);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .sheet-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary { background-color: var(--text-color); color: var(--card-bg); }
+    .btn-secondary { background-color: var(--day-hover); color: var(--text-color); }
+    .btn-danger { background-color: #ff3b30; color: #ffffff; }
+
+    /* Preview évènement calendrier iOS */
+    .event-preview-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .event-preview-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .event-preview-date { font-size: 13px; color: var(--subtext-color); margin-bottom: 12px; }
+    .event-preview-box {
+      background: rgba(10, 132, 255, 0.15);
+      border-left: 4px solid #0a84ff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #0a84ff;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- En-tête "Mes séances" + Bouton Réglages -->
-    <div class="app-topbar">
+  <div class="app-wrapper">
+    <!-- En-tête Hors-Carte (Mes séances + Réglages) -->
+    <div class="app-topbar-outside">
       <h2>Mes séances</h2>
       <button class="btn-settings" id="btn-open-settings" aria-label="Paramètres">
         <svg viewBox="0 0 24 24">
@@ -566,72 +641,162 @@
       </button>
     </div>
 
-    <div class="header">
-      <h1 id="month-year"></h1>
-      <div>
-        <button class="nav-btn" id="prev-btn">&#10094;</button>
-        <button class="nav-btn" id="next-btn">&#10095;</button>
-      </div>
-    </div>
-
-    <!-- Commutateur Fait / Planifier -->
-    <div class="mode-switch" id="mode-switch">
-      <div class="mode-indicator"></div>
-      <button class="mode-btn active" id="mode-done-btn">✓ Fait</button>
-      <button class="mode-btn" id="mode-plan-btn">Planifier</button>
-    </div>
-
-    <!-- Section Menu des Sports -->
-    <div class="sports-section">
-      <div class="sports-header" id="toggle-sports">
-        <span class="sports-title">Mes Sports</span>
-        <div class="collapsed-sports-preview" id="sports-preview"></div>
-        <button class="toggle-btn" id="toggle-btn-text">Réduire</button>
+    <!-- Container Carte -->
+    <div class="container">
+      <div class="header">
+        <h1 id="month-year"></h1>
+        <div>
+          <button class="nav-btn" id="prev-btn">&#10094;</button>
+          <button class="nav-btn" id="next-btn">&#10095;</button>
+        </div>
       </div>
 
-      <div class="sports-list" id="sports-list"></div>
-      <button class="add-sport-btn" id="add-sport-btn">+ Ajouter un sport</button>
-    </div>
+      <div class="mode-switch" id="mode-switch">
+        <div class="mode-indicator"></div>
+        <button class="mode-btn active" id="mode-done-btn">✓ Fait</button>
+        <button class="mode-btn" id="mode-plan-btn">Planifier</button>
+      </div>
 
-    <div class="weekdays">
-      <div class="weekday">Lun</div>
-      <div class="weekday">Mar</div>
-      <div class="weekday">Mer</div>
-      <div class="weekday">Jeu</div>
-      <div class="weekday">Ven</div>
-      <div class="weekday">Sam</div>
-      <div class="weekday">Dim</div>
-    </div>
+      <div class="sports-section">
+        <div class="sports-header" id="toggle-sports">
+          <span class="sports-title">Mes Sports</span>
+          <div class="collapsed-sports-preview" id="sports-preview"></div>
+          <button class="toggle-btn" id="toggle-btn-text">Réduire</button>
+        </div>
 
-    <div class="days-wrapper">
-      <div class="days" id="days-container"></div>
-    </div>
+        <div class="sports-list" id="sports-list"></div>
+        <button class="add-sport-btn" id="add-sport-btn">+ Ajouter un sport</button>
+      </div>
 
-    <div class="stats">
-      <span>Fait / Planifié</span>
-      <span class="stats-count" id="workout-count">0 / 0</span>
+      <div class="weekdays">
+        <div class="weekday">Lun</div>
+        <div class="weekday">Mar</div>
+        <div class="weekday">Mer</div>
+        <div class="weekday">Jeu</div>
+        <div class="weekday">Ven</div>
+        <div class="weekday">Sam</div>
+        <div class="weekday">Dim</div>
+      </div>
+
+      <div class="days-wrapper">
+        <div class="days" id="days-container"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stats-row">
+          <span>Fait / Planifié</span>
+          <span class="stats-count" id="workout-count">0 / 0</span>
+        </div>
+        <div class="goal-progress-bar" id="goal-bar-container">
+          <div class="goal-progress-fill" id="goal-progress-fill"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Pop-up Modal des Paramètres -->
-  <div class="modal-overlay" id="modal-settings">
-    <div class="modal-content">
-      <h3>Paramètres</h3>
-      <p id="settings-stats-text">Nombre de séances enregistrées : 0</p>
-      <button class="modal-btn btn-danger" id="btn-reset-data">Réinitialiser les données</button>
-      <button class="modal-btn btn-secondary" id="btn-close-settings">Fermer</button>
+  <!-- POPUP BOTTOM SHEET (Réglages & Export Calendrier) -->
+  <div class="sheet-overlay" id="sheet-overlay">
+    <div class="bottom-sheet" id="bottom-sheet">
+      <div class="sheet-handle"></div>
+      
+      <!-- Contenu Paramètres -->
+      <div id="sheet-settings-content" style="display: none;">
+        <div class="sheet-header">
+          <h3>Paramètres</h3>
+          <button class="btn-close-sheet" class="close-sheet-btn">✕</button>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-title">Personnalisation</div>
+          <div class="setting-item">
+            <span>Thème</span>
+            <select id="setting-theme">
+              <option value="auto">Automatique</option>
+              <option value="light">Clair</option>
+              <option value="dark">Sombre</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <span>Objectif mensuel</span>
+            <input type="number" id="setting-goal" min="1" max="31" value="12" style="width: 60px;">
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-title">Préférences Calendrier</div>
+          <div class="setting-item">
+            <span>Calendrier par défaut</span>
+            <select id="setting-calendar-type">
+              <option value="auto">Auto (Système)</option>
+              <option value="apple">Apple Calendar (.ics)</option>
+              <option value="google">Google Agenda</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <span>Durée par séance</span>
+            <select id="setting-duration">
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60" selected>1 heure</option>
+              <option value="90">1h 30min</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-title">Données & Sauvegarde</div>
+          <button class="sheet-btn btn-secondary" id="btn-export-json">💾 Exporter les données (JSON)</button>
+          <button class="sheet-btn btn-secondary" id="btn-import-json">📥 Importer les données</button>
+          <input type="file" id="import-file-input" accept=".json" style="display:none;">
+          <button class="sheet-btn btn-danger" id="btn-reset-app">Effacer toutes les données</button>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-title">Statistiques & Infos</div>
+          <div class="setting-item">
+            <span>Total séances réalisées</span>
+            <span id="stat-total-workouts">0</span>
+          </div>
+          <div class="setting-item">
+            <span>Mois le plus actif</span>
+            <span id="stat-best-month">-</span>
+          </div>
+          <div class="setting-item">
+            <span>Version</span>
+            <span>v1.0 - Mon Sport</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenu Export Calendrier -->
+      <div id="sheet-calendar-content" style="display: none;">
+        <div class="sheet-header">
+          <h3>Ajouter l'évènement</h3>
+          <button class="btn-close-sheet" class="close-sheet-btn">✕</button>
+        </div>
+
+        <div class="event-preview-card">
+          <div class="event-preview-title" id="cal-preview-title">Séance Musculation</div>
+          <div class="event-preview-date" id="cal-preview-date">Vendredi 22 août 2026</div>
+          <div class="event-preview-box" id="cal-preview-time">09:00 - 10:00</div>
+        </div>
+
+        <button class="sheet-btn btn-primary" id="btn-confirm-add-calendar">Ajouter au calendrier</button>
+      </div>
+
     </div>
   </div>
 
   <script>
+    // État Global App
     let currentDate = new Date();
     let selectedSportId = null;
     let editingSportId = null;
     let currentMode = 'done';
     let isNavigating = false;
+    let pendingCalendarExport = null;
 
     const defaultColors = ['#30d158', '#0a84ff', '#ff9f0a', '#bf5af2', '#ff3b30', '#ffd60a', '#64d2ff', '#ff2d55'];
-
     const defaultSports = [
       { id: '1', name: "Musculation", color: '#30d158' },
       { id: '2', name: "Course à pied", color: '#0a84ff' },
@@ -640,9 +805,18 @@
       { id: '5', name: "Autre sport", color: '#ff3b30' }
     ];
 
+    // Chargement Config
     let sports = JSON.parse(localStorage.getItem('sports_config')) || defaultSports;
     if (sports.length > 0) selectedSportId = sports[0].id;
 
+    let appConfig = JSON.parse(localStorage.getItem('app_config')) || {
+      theme: 'auto',
+      monthlyGoal: 12,
+      calendarType: 'auto',
+      defaultDuration: 60
+    };
+
+    // DOM Elements
     const monthYearElement = document.getElementById('month-year');
     const daysContainer = document.getElementById('days-container');
     const sportsList = document.getElementById('sports-list');
@@ -657,62 +831,162 @@
     const modeDoneBtn = document.getElementById('mode-done-btn');
     const modePlanBtn = document.getElementById('mode-plan-btn');
 
-    // Modale Settings
-    const modalSettings = document.getElementById('modal-settings');
+    // Bottom Sheet
+    const sheetOverlay = document.getElementById('sheet-overlay');
+    const sheetSettingsContent = document.getElementById('sheet-settings-content');
+    const sheetCalendarContent = document.getElementById('sheet-calendar-content');
     const btnOpenSettings = document.getElementById('btn-open-settings');
-    const btnCloseSettings = document.getElementById('btn-close-settings');
-    const btnResetData = document.getElementById('btn-reset-data');
-    const settingsStatsText = document.getElementById('settings-stats-text');
+
+    // Paramètres DOM
+    const settingTheme = document.getElementById('setting-theme');
+    const settingGoal = document.getElementById('setting-goal');
+    const settingCalendarType = document.getElementById('setting-calendar-type');
+    const settingDuration = document.getElementById('setting-duration');
+    const goalProgressFill = document.getElementById('goal-progress-fill');
+
+    // Appliquer Thème
+    function applyTheme() {
+      if (appConfig.theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else if (appConfig.theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    }
+
+    // Gestion de la Sheet Modal
+    function openSheet(type) {
+      sheetSettingsContent.style.display = type === 'settings' ? 'block' : 'none';
+      sheetCalendarContent.style.display = type === 'calendar' ? 'block' : 'none';
+      sheetOverlay.classList.add('active');
+    }
+
+    function closeSheet() {
+      sheetOverlay.classList.remove('active');
+    }
+
+    document.querySelectorAll('.btn-close-sheet').forEach(btn => btn.addEventListener('click', closeSheet));
+    sheetOverlay.addEventListener('click', (e) => {
+      if (e.target === sheetOverlay) closeSheet();
+    });
 
     btnOpenSettings.addEventListener('click', () => {
-      let totalWorkouts = 0;
+      // Maj valeurs UI
+      settingTheme.value = appConfig.theme;
+      settingGoal.value = appConfig.monthlyGoal;
+      settingCalendarType.value = appConfig.calendarType;
+      settingDuration.value = appConfig.defaultDuration;
+
+      // Maj Stats
+      calculateStats();
+      openSheet('settings');
+    });
+
+    // Écouteurs Paramètres
+    settingTheme.addEventListener('change', (e) => {
+      appConfig.theme = e.target.value;
+      saveConfig();
+      applyTheme();
+    });
+
+    settingGoal.addEventListener('change', (e) => {
+      appConfig.monthlyGoal = parseInt(e.target.value) || 12;
+      saveConfig();
+      renderCalendar();
+    });
+
+    settingCalendarType.addEventListener('change', (e) => {
+      appConfig.calendarType = e.target.value;
+      saveConfig();
+    });
+
+    settingDuration.addEventListener('change', (e) => {
+      appConfig.defaultDuration = parseInt(e.target.value);
+      saveConfig();
+    });
+
+    function saveConfig() {
+      localStorage.setItem('app_config', JSON.stringify(appConfig));
+    }
+
+    // Calcul des Stats Globale
+    function calculateStats() {
+      let total = 0;
+      let monthCounts = {};
+
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('workout_')) totalWorkouts++;
+        if (key.startsWith('workout_')) {
+          total++;
+          const monthKey = key.substring(8, 15); // YYYY-MM
+          monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+        }
       }
-      settingsStatsText.textContent = `Séances enregistrées : ${totalWorkouts}`;
-      modalSettings.classList.add('active');
+
+      document.getElementById('stat-total-workouts').textContent = total;
+
+      let bestMonthStr = '-';
+      let maxCount = 0;
+      for (const [m, count] of Object.entries(monthCounts)) {
+        if (count > maxCount) {
+          maxCount = count;
+          const [y, mon] = m.split('-');
+          const monthName = new Date(y, mon - 1).toLocaleString('fr', { month: 'long' });
+          bestMonthStr = `${monthName} ${y} (${count})`;
+        }
+      }
+      document.getElementById('stat-best-month').textContent = bestMonthStr;
+    }
+
+    // Exporter & Importer JSON
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const exportData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        exportData[k] = localStorage.getItem(k);
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `sport_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
     });
 
-    btnCloseSettings.addEventListener('click', () => {
-      modalSettings.classList.remove('active');
+    document.getElementById('btn-import-json').addEventListener('click', () => {
+      document.getElementById('import-file-input').click();
     });
 
-    btnResetData.addEventListener('click', () => {
-      if (confirm("Es-tu sûr de vouloir effacer toutes tes séances et réinitialiser l'application ?")) {
+    document.getElementById('import-file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          localStorage.clear();
+          for (const [k, v] of Object.entries(importedData)) {
+            localStorage.setItem(k, typeof v === 'object' ? JSON.stringify(v) : v);
+          }
+          alert("Données importées avec succès !");
+          location.reload();
+        } catch (err) {
+          alert("Fichier JSON invalide.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btn-reset-app').addEventListener('click', () => {
+      if (confirm("Es-tu sûr de vouloir supprimer toutes tes séances ? Cette action est irréversible.")) {
         localStorage.clear();
         location.reload();
       }
     });
 
-    // Détection OS pour l'export Calendrier
-    function estiOS() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    }
-
-    function exporterEvenementCalendrier(titreSport, dateStr) {
-      const reponse = confirm("Voulez vous ajouter cet évent à votre calendrier ?");
-      if (reponse) {
-        if (estiOS()) {
-          // Apple Calendar (.ics)
-          const cleanDate = dateStr.replace(/-/g, '');
-          const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Séance ${titreSport}\nDTSTART:${cleanDate}T090000Z\nDTEND:${cleanDate}T100000Z\nEND:VEVENT\nEND:VCALENDAR`;
-          const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-          const link = document.createElement('a');
-          link.href = window.URL.createObjectURL(blob);
-          link.download = 'seance.ics';
-          link.click();
-        } else {
-          // Google Agenda
-          const cleanDate = dateStr.replace(/-/g, '');
-          const urlGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Séance ' + titreSport)}&dates=${cleanDate}T090000Z/${cleanDate}T100000Z`;
-          window.open(urlGoogle, '_blank');
-        }
-      }
-    }
-
-    // Gestion des modes
+    // Modes Fait / Planifier
     modeDoneBtn.addEventListener('click', () => {
       currentMode = 'done';
       modeDoneBtn.classList.add('active');
@@ -734,12 +1008,7 @@
       sportsList.classList.toggle('collapsed', isCollapsed);
       addSportBtn.style.display = isCollapsed ? 'none' : 'block';
       toggleBtnText.textContent = isCollapsed ? 'Afficher' : 'Réduire';
-      
-      if (isCollapsed) {
-        sportsPreview.classList.remove('hidden');
-      } else {
-        sportsPreview.classList.add('hidden');
-      }
+      sportsPreview.classList.toggle('hidden', !isCollapsed);
     }
 
     toggleSportsHeader.addEventListener('click', (e) => {
@@ -751,21 +1020,16 @@
 
     function renderSportsPreview() {
       sportsPreview.innerHTML = '';
-      const topSports = sports.slice(0, 5);
-      
-      topSports.forEach(sport => {
+      sports.slice(0, 5).forEach(sport => {
         const dot = document.createElement('div');
         dot.className = `preview-dot ${sport.id === selectedSportId ? 'active' : ''}`;
         dot.style.backgroundColor = sport.color;
-        dot.title = sport.name;
-
         dot.addEventListener('click', (e) => {
           e.stopPropagation();
           selectedSportId = sport.id;
           renderSportsList();
           renderSportsPreview();
         });
-
         sportsPreview.appendChild(dot);
       });
     }
@@ -785,14 +1049,9 @@
         colorInput.value = sport.color;
         colorInput.className = 'color-picker-hidden';
 
-        dot.addEventListener('click', (e) => {
-          e.stopPropagation();
-          colorInput.click();
-        });
-
+        dot.addEventListener('click', (e) => { e.stopPropagation(); colorInput.click(); });
         colorInput.addEventListener('input', (e) => {
           sport.color = e.target.value;
-          dot.style.backgroundColor = sport.color;
           saveSports();
           renderSportsPreview();
           renderCalendar();
@@ -806,21 +1065,15 @@
           input.type = 'text';
           input.className = 'sport-input';
           input.value = sport.name;
-
-          const finishEditing = () => {
+          const finish = () => {
             sport.name = input.value.trim() || "Sport";
             editingSportId = null;
             saveSports();
             renderSportsList();
             renderSportsPreview();
           };
-
-          input.addEventListener('change', finishEditing);
-          input.addEventListener('blur', finishEditing);
-          input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') finishEditing();
-          });
-
+          input.addEventListener('blur', finish);
+          input.addEventListener('keydown', (e) => { if (e.key === 'Enter') finish(); });
           item.appendChild(input);
           setTimeout(() => input.focus(), 50);
         } else {
@@ -833,46 +1086,33 @@
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
         editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
-        editBtn.title = "Modifier le nom";
-
         editBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           editingSportId = (editingSportId === sport.id) ? null : sport.id;
           renderSportsList();
         });
-
         item.appendChild(editBtn);
 
         if (sports.length > 1) {
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'delete-btn';
           deleteBtn.innerHTML = '&times;';
-          deleteBtn.title = "Supprimer";
-
           deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             sports = sports.filter(s => s.id !== sport.id);
-            if (selectedSportId === sport.id) {
-              selectedSportId = sports.length > 0 ? sports[0].id : null;
-            }
-            if (editingSportId === sport.id) {
-              editingSportId = null;
-            }
+            if (selectedSportId === sport.id) selectedSportId = sports[0].id;
             saveSports();
             renderSportsList();
             renderSportsPreview();
             renderCalendar();
           });
-
           item.appendChild(deleteBtn);
         }
 
         item.addEventListener('click', () => {
-          if (editingSportId !== sport.id) {
-            selectedSportId = sport.id;
-            renderSportsList();
-            renderSportsPreview();
-          }
+          selectedSportId = sport.id;
+          renderSportsList();
+          renderSportsPreview();
         });
 
         sportsList.appendChild(item);
@@ -881,8 +1121,7 @@
 
     addSportBtn.addEventListener('click', () => {
       const newId = Date.now().toString();
-      const randomColor = defaultColors[sports.length % defaultColors.length];
-      sports.push({ id: newId, name: `Sport ${sports.length + 1}`, color: randomColor });
+      sports.push({ id: newId, name: `Sport ${sports.length + 1}`, color: defaultColors[sports.length % defaultColors.length] });
       selectedSportId = newId;
       saveSports();
       renderSportsList();
@@ -893,18 +1132,66 @@
       localStorage.setItem('sports_config', JSON.stringify(sports));
     }
 
-    function getContrastTextColor(hexColor) {
-      if (!hexColor || hexColor[0] !== '#') return '#000000';
-      let hex = hexColor.substring(1);
-      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-      const r = parseInt(hex.substring(0, 2), 16) || 0;
-      const g = parseInt(hex.substring(2, 4), 16) || 0;
-      const b = parseInt(hex.substring(4, 6), 16) || 0;
-      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-      return (yiq >= 128) ? '#000000' : '#ffffff';
+    function getContrastTextColor(hex) {
+      if (!hex || hex[0] !== '#') return '#000000';
+      let c = hex.substring(1);
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const r = parseInt(c.substring(0, 2), 16) || 0;
+      const g = parseInt(c.substring(2, 4), 16) || 0;
+      const b = parseInt(c.substring(4, 6), 16) || 0;
+      return ((r * 299) + (g * 587) + (b * 114)) / 1000 >= 128 ? '#000000' : '#ffffff';
     }
 
-    // Calendrier avec appui long pour l'export calendrier
+    // Gestion Export Calendrier via Pop-up
+    function triggerCalendarModal(sportName, dateStr) {
+      const d = new Date(dateStr);
+      const dateFormatted = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      
+      const durationMinutes = appConfig.defaultDuration || 60;
+      const startTimeStr = "09:00";
+      const endHour = 9 + Math.floor(durationMinutes / 60);
+      const endMin = (durationMinutes % 60) === 0 ? "00" : (durationMinutes % 60);
+      const endTimeStr = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+
+      document.getElementById('cal-preview-title').textContent = `Séance ${sportName}`;
+      document.getElementById('cal-preview-date').textContent = dateFormatted;
+      document.getElementById('cal-preview-time').textContent = `${startTimeStr} - ${endTimeStr}`;
+
+      pendingCalendarExport = { sportName, dateStr, durationMinutes };
+      openSheet('calendar');
+    }
+
+    document.getElementById('btn-confirm-add-calendar').addEventListener('click', () => {
+      if (!pendingCalendarExport) return;
+      const { sportName, dateStr, durationMinutes } = pendingCalendarExport;
+      const cleanDate = dateStr.replace(/-/g, '');
+
+      let useApple = false;
+      if (appConfig.calendarType === 'apple') useApple = true;
+      else if (appConfig.calendarType === 'google') useApple = false;
+      else {
+        useApple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      }
+
+      if (useApple) {
+        const endHour = 9 + Math.floor(durationMinutes / 60);
+        const endMin = (durationMinutes % 60) === 0 ? "00" : (durationMinutes % 60);
+        const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Séance ${sportName}\nDTSTART:${cleanDate}T090000Z\nDTEND:${cleanDate}T${String(endHour).padStart(2, '0')}${endMin}00Z\nEND:VEVENT\nEND:VCALENDAR`;
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'seance.ics';
+        link.click();
+      } else {
+        const endHour = 9 + Math.floor(durationMinutes / 60);
+        const endMin = (durationMinutes % 60) === 0 ? "00" : (durationMinutes % 60);
+        const urlGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Séance ' + sportName)}&dates=${cleanDate}T090000Z/${cleanDate}T${String(endHour).padStart(2, '0')}${endMin}00Z`;
+        window.open(urlGoogle, '_blank');
+      }
+      closeSheet();
+    });
+
+    // Calendar Render
     function renderCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -913,7 +1200,6 @@
       monthYearElement.textContent = `${monthNames[month]} ${year}`;
 
       daysContainer.innerHTML = '';
-
       const firstDayIndex = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       let paddingDays = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
@@ -959,38 +1245,41 @@
           planCount++;
         }
 
-        // --- Appui long pour exporter au calendrier ---
+        // Appui Long Export Calendrier
         let touchTimer = null;
         let isLongPress = false;
 
-        dayDiv.addEventListener('touchstart', () => {
+        const startPress = () => {
           isLongPress = false;
           touchTimer = setTimeout(() => {
             isLongPress = true;
             const currentSportObj = sports.find(s => s.id === selectedSportId);
-            const sportName = currentSportObj ? currentSportObj.name : "Sport";
-            exporterEvenementCalendrier(sportName, formattedDate);
-          }, 500); // 0.5s d'appui long
-        });
+            triggerCalendarModal(currentSportObj ? currentSportObj.name : "Sport", formattedDate);
+          }, 500);
+        };
 
-        dayDiv.addEventListener('touchend', () => clearTimeout(touchTimer));
-        dayDiv.addEventListener('touchmove', () => clearTimeout(touchTimer));
+        const cancelPress = () => clearTimeout(touchTimer);
 
-        // Clik classique (sauf si appui long détecté)
+        dayDiv.addEventListener('touchstart', startPress);
+        dayDiv.addEventListener('touchend', cancelPress);
+        dayDiv.addEventListener('touchmove', cancelPress);
+
+        dayDiv.addEventListener('mousedown', startPress);
+        dayDiv.addEventListener('mouseup', cancelPress);
+        dayDiv.addEventListener('mouseleave', cancelPress);
+
         dayDiv.addEventListener('click', () => {
           if (isLongPress) return;
           if (!selectedSportId) return;
 
           if (currentMode === 'done') {
-            const currentDoneId = localStorage.getItem(dateDoneKey);
-            if (currentDoneId === selectedSportId) {
+            if (localStorage.getItem(dateDoneKey) === selectedSportId) {
               localStorage.removeItem(dateDoneKey);
             } else {
               localStorage.setItem(dateDoneKey, selectedSportId);
             }
           } else {
-            const currentPlanId = localStorage.getItem(datePlanKey);
-            if (currentPlanId === selectedSportId) {
+            if (localStorage.getItem(datePlanKey) === selectedSportId) {
               localStorage.removeItem(datePlanKey);
             } else {
               localStorage.setItem(datePlanKey, selectedSportId);
@@ -1002,41 +1291,26 @@
         daysContainer.appendChild(dayDiv);
       }
 
-      updateStats(doneCount, planCount);
+      workoutCountElement.textContent = `${doneCount} fait${doneCount > 1 ? 's' : ''} / ${planCount} prévu${planCount > 1 ? 's' : ''}`;
+
+      // Barre de progression Objectif
+      const goal = appConfig.monthlyGoal || 12;
+      const progressPercent = Math.min(100, Math.round((doneCount / goal) * 100));
+      goalProgressFill.style.width = `${progressPercent}%`;
     }
 
-    function navigateMonth(direction) {
-      if (isNavigating) return;
-      isNavigating = true;
+    prevBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    });
 
-      const outClass = direction === 'next' ? 'fade-next-out' : 'fade-prev-out';
-      const inClass = direction === 'next' ? 'fade-next-in' : 'fade-prev-in';
+    nextBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    });
 
-      daysContainer.classList.add(outClass);
-
-      setTimeout(() => {
-        currentDate.setMonth(currentDate.getMonth() + (direction === 'next' ? 1 : -1));
-        renderCalendar();
-        
-        daysContainer.classList.remove(outClass);
-        daysContainer.classList.add(inClass);
-
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            daysContainer.classList.remove(inClass);
-            isNavigating = false;
-          }, 50);
-        });
-      }, 200);
-    }
-
-    function updateStats(done, plan) {
-      workoutCountElement.textContent = `${done} fait${done > 1 ? 's' : ''} / ${plan} prévu${plan > 1 ? 's' : ''}`;
-    }
-
-    prevBtn.addEventListener('click', () => navigateMonth('prev'));
-    nextBtn.addEventListener('click', () => navigateMonth('next'));
-
+    // Init
+    applyTheme();
     renderSportsList();
     renderSportsPreview();
     updateAccordion();
