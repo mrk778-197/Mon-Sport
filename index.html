@@ -960,19 +960,33 @@
       document.getElementById('stat-best-month').textContent = bestMonthStr;
     }
 
-    document.getElementById('btn-export-json').addEventListener('click', () => {
-      const exportData = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        exportData[k] = localStorage.getItem(k);
+        document.getElementById('btn-export-json').addEventListener('click', () => {
+      try {
+        const exportData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          exportData[k] = localStorage.getItem(k);
+        }
+
+        const jsonString = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.href = url;
+        downloadAnchor.download = `sport_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(downloadAnchor);
+          URL.revokeObjectURL(url);
+        }, 100);
+
+      } catch (err) {
+        alert("Erreur lors de l'export des données : " + err.message);
       }
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `sport_backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
     });
 
     document.getElementById('btn-import-json').addEventListener('click', () => {
