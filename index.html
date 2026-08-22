@@ -382,7 +382,7 @@
       width: 17px;
       height: 17px;
       stroke: currentColor;
-      fill: stroke;
+      fill: none;
       stroke-width: 2.2;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -1124,11 +1124,11 @@
           item.appendChild(label);
         }
 
-        // Bouton Crayon (SVG)
+        // Bouton Crayon Simplifié (SVG)
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
         editBtn.setAttribute('aria-label', 'Modifier');
-        editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
+        editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17 3l4 4L7 19H3v-4L17 3z"/></svg>`;
         editBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           editingSportId = (editingSportId === sport.id) ? null : sport.id;
