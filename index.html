@@ -503,7 +503,7 @@
       background: var(--modal-bg);
       border-top-left-radius: 24px;
       border-top-right-radius: 24px;
-      padding: 16px 20px 32px 20px;
+      padding: 24px 20px 32px 20px;
       z-index: 1000;
       transform: translateY(100%);
       transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
@@ -516,15 +516,6 @@
       transform: translateY(0);
     }
 
-    .sheet-handle {
-      width: 36px;
-      height: 5px;
-      background-color: var(--subtext-color);
-      opacity: 0.4;
-      border-radius: 3px;
-      margin: 0 auto 16px auto;
-    }
-
     .sheet-header {
       display: flex;
       justify-content: space-between;
@@ -533,10 +524,11 @@
     }
 
     .sheet-header h3 {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
     }
 
+    /* Bouton Croix parfaitement centré */
     .btn-close-sheet {
       background: var(--day-hover);
       border: none;
@@ -544,12 +536,25 @@
       height: 30px;
       border-radius: 50%;
       color: var(--subtext-color);
-      font-size: 16px;
-      font-weight: 700;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      padding: 0;
+      line-height: 0;
+      transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn-close-sheet:hover {
+      opacity: 0.8;
+    }
+
+    .btn-close-sheet svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      stroke-linecap: round;
     }
 
     .setting-group {
@@ -575,6 +580,7 @@
       margin-bottom: 8px;
       font-size: 14px;
       font-weight: 500;
+      gap: 12px;
     }
 
     .setting-item select, .setting-item input[type="number"] {
@@ -585,6 +591,8 @@
       border-radius: 8px;
       font-size: 13px;
       outline: none;
+      max-width: 100%;
+      text-align: right;
     }
 
     .sheet-btn {
@@ -599,7 +607,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
     }
 
     .btn-primary { background-color: var(--text-color); color: var(--card-bg); }
@@ -697,13 +704,14 @@
   <!-- POPUP BOTTOM SHEET (Réglages & Export Calendrier) -->
   <div class="sheet-overlay" id="sheet-overlay">
     <div class="bottom-sheet" id="bottom-sheet">
-      <div class="sheet-handle"></div>
       
       <!-- Contenu Paramètres -->
       <div id="sheet-settings-content" style="display: none;">
         <div class="sheet-header">
           <h3>Paramètres</h3>
-          <button class="btn-close-sheet" class="close-sheet-btn">✕</button>
+          <button class="btn-close-sheet close-sheet-btn" aria-label="Fermer">
+            <svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11"/></svg>
+          </button>
         </div>
 
         <div class="setting-group">
@@ -745,8 +753,8 @@
 
         <div class="setting-group">
           <div class="setting-title">Données & Sauvegarde</div>
-          <button class="sheet-btn btn-secondary" id="btn-export-json">💾 Exporter les données (JSON)</button>
-          <button class="sheet-btn btn-secondary" id="btn-import-json">📥 Importer les données</button>
+          <button class="sheet-btn btn-secondary" id="btn-export-json">Exporter les données (JSON)</button>
+          <button class="sheet-btn btn-secondary" id="btn-import-json">Importer les données</button>
           <input type="file" id="import-file-input" accept=".json" style="display:none;">
           <button class="sheet-btn btn-danger" id="btn-reset-app">Effacer toutes les données</button>
         </div>
@@ -772,7 +780,9 @@
       <div id="sheet-calendar-content" style="display: none;">
         <div class="sheet-header">
           <h3>Ajouter l'évènement</h3>
-          <button class="btn-close-sheet" class="close-sheet-btn">✕</button>
+          <button class="btn-close-sheet close-sheet-btn" aria-label="Fermer">
+            <svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11"/></svg>
+          </button>
         </div>
 
         <div class="event-preview-card">
@@ -866,7 +876,7 @@
       sheetOverlay.classList.remove('active');
     }
 
-    document.querySelectorAll('.btn-close-sheet').forEach(btn => btn.addEventListener('click', closeSheet));
+    document.querySelectorAll('.close-sheet-btn').forEach(btn => btn.addEventListener('click', closeSheet));
     sheetOverlay.addEventListener('click', (e) => {
       if (e.target === sheetOverlay) closeSheet();
     });
